@@ -1,43 +1,37 @@
 %{
 #include <stdio.h>
-#include <stdlib.h>
-
 int yylex();
 void yyerror(const char *s);
 %}
 
-%token FOR ID NUMBER ASSIGN LT GT INC DEC LPAREN RPAREN SEMICOLON
+%token FOR ID NUM RELOP ASSIGN INC DEC
+%token LPAREN RPAREN LBRACE RBRACE SEMI
 
 %%
-program : for_stmt
-        ;
-
-for_stmt : FOR LPAREN expr SEMICOLON condition SEMICOLON update RPAREN
-         {
-            printf("Valid FOR loop syntax.\n");
-         }
-         ;
-
-expr : ID ASSIGN NUMBER
+stmt : FOR LPAREN init SEMI cond SEMI inc RPAREN body
+     { printf("\nValid FOR loop syntax.\n"); }
      ;
 
-condition : ID LT NUMBER
-          | ID GT NUMBER
-          ;
+init : ID ASSIGN NUM ;
 
-update : ID INC
-       | ID DEC
-       | ID ASSIGN ID
-       ;
+cond : ID RELOP NUM ;
+
+inc  : ID INC
+     | INC ID
+     | ID DEC
+     | DEC ID
+     ;
+
+body : LBRACE RBRACE
+     | SEMI
+     | /* empty body allowed */
+     ;
 %%
-void yyerror(const char *s)
-{
-    fprintf(stderr, "Error: %s\n", s);
-}
 
-int main()
-{
-    printf("Enter a FOR loop statement:\n");
+void yyerror(const char *s){ printf("\nSyntax Error\n"); }
+
+int main() {
+    printf("Enter a FOR loop:\n");
     yyparse();
     return 0;
 }
