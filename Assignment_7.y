@@ -6,29 +6,35 @@ int yylex(void);
 void yyerror(const char *s);
 %}
 
-%token NUMBER PLUS MULT MINUS DIVIDE
+%union {
+    int num;
+}
+
+%token <num> NUMBER
+%token PLUS MULT MINUS DIVIDE
+%type  <num> expr
 
 %%
 
 line:
-    expr '\n'       { printf("Result: %d\n", $1); }
-  | '\n'
-  ;
+      expr '\n'      { printf("Result: %d\n", $1); }
+    | '\n'
+    ;
 
 expr:
-    NUMBER              { $$ = $1; }
-  | expr expr PLUS      { $$ = $1 + $2; }
-  | expr expr MULT      { $$ = $1 * $2; }
-  | expr expr MINUS     { $$ = $1 - $2; }
-  | expr expr DIVIDE    { 
-                            if ($2 == 0) {
-                                yyerror("Division by zero");
-                                $$ = 0;
-                            } else {
-                                $$ = $1 / $2;
+      NUMBER                 { $$ = $1; }
+    | expr expr PLUS        { $$ = $1 + $2; }
+    | expr expr MULT        { $$ = $1 * $2; }
+    | expr expr MINUS       { $$ = $1 - $2; }
+    | expr expr DIVIDE      {
+                                if ($2 == 0) {
+                                    yyerror("Division by zero");
+                                    $$ = 0;
+                                } else {
+                                    $$ = $1 / $2;
+                                }
                             }
-                         }
-  ;
+    ;
 
 %%
 
