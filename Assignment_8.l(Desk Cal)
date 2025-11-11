@@ -3,21 +3,21 @@
 #include <stdlib.h>
 %}
 
-%%
-
-[0-9]+              { yylval = atoi(yytext); return NUMBER; }
-[ \t]+              ;                 /* ignore whitespace */
-"+"                 return PLUS;
-"-"                 return MINUS;
-"*"                 return MULT;
-"/"                 return DIVIDE;
-"("                 return '(';
-")"                 return ')';
-"\n"                return EOL;
-.                   return yytext[0]; /* catch all invalid chars */
+%option noyywrap
 
 %%
 
-int yywrap() {
-    return 1;
-}
+[0-9]+          { yylval = atoi(yytext); return NUMBER; }
+[ \t]           ;   // ignore spaces
+\n              { return '\n'; }
+"+"             { return PLUS; }
+"-"             { return MINUS; }
+"*"             { return MULT; }
+"/"             { return DIV; }
+"%"             { return MOD; }
+"^"             { return POW; }
+"("             { return LPAREN; }
+")"             { return RPAREN; }
+.               { return yytext[0]; }
+
+%%
