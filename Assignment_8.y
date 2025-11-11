@@ -1,38 +1,49 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 int yylex(void);
 void yyerror(const char *s);
 %}
 
-%token NUMBER PLUS MINUS MULT DIVIDE EOL
+%token NUMBER
+%token PLUS MINUS MULT DIV MOD POW LPAREN RPAREN
+
+// Operator precedence & associativity
 %left PLUS MINUS
-%left MULT DIVIDE
+%left MULT DIV MOD
+%right POW
+%left LPAREN RPAREN
 
 %%
 
-lines:
-      lines expr EOL        { printf("= %d\n", $2); }
-    | lines error EOL       { yyerror("Invalid expression, skipping..."); yyerrok; }
-    | /* empty */
-    ;
+line:
+    /* empty */
+  | line expr '\n'   { printf("Result: %d\n", $2); }
+  | line error '\n'  { yyerror("Invalid expression, try again."); yyerrok; }
+  ;
 
 expr:
-      NUMBER
-    | expr PLUS expr        { $$ = $1 + $3; }
-    | expr MINUS expr       { $$ = $1 - $3; }
-    | expr MULT expr        { $$ = $1 * $3; }
-    | expr DIVIDE expr      { 
-                                if ($3 == 0) {
-                                    yyerror("Division by zero");
-                                    $$ = 0;
-                                } else {
-                                    $$ = $1 / $3;
-                                }
-                             }
-    | '(' expr ')'          { $$ = $2; }
-    ;
+    NUMBER               { $$ = $1; }
+  | expr PLUS expr       { $$ = $1 + $3; }
+  | expr MINUS expr      { $$ = $1 - $3; }
+  | expr MULT expr       { $$ = $1 * $3; }
+  | expr DIV expr        {
+                            if ($3 == 0) {
+                                yyerror("Division by zero");
+                                $$ = 0;
+                            } else $$ = $1 / $3;
+                          }
+  | expr MOD expr        {
+                            if ($3 == 0) {
+                                yyerror("Modulo by zero");
+                                $$ = 0;
+                            } else $$ = $1 % $3;
+                          }
+  | expr POW expr        { $$ = (int)pow($1, $3); }
+  | LPAREN expr RPAREN   { $$ = $2; }
+  ;
 
 %%
 
@@ -41,7 +52,7 @@ void yyerror(const char *s) {
 }
 
 int main() {
-    printf("Desk Calculator (Ctrl+C to quit)\n");
+    printf("Desk Calculator (type Ctrl+C to exit)\n");
     yyparse();
     return 0;
 }
