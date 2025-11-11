@@ -1,7 +1,6 @@
 %{
 #include <stdio.h>
 #include <string.h>
-%}
 
 int string_to_int(char *str) {
     int result = 0;
@@ -34,4 +33,22 @@ void decimal_to_hex(int num) {
         printf("%c", hex[j]);
     }
     printf("\n");
+}
+%}
+
+%%
+
+[0-9]+   {
+            int n = string_to_int(yytext);
+            decimal_to_hex(n);
+         }
+
+\n       { /* ignore */ }
+.        { /* ignore */ }
+
+%%
+
+int main() {
+    yylex();
+    return 0;
 }
